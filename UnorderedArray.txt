@@ -1,0 +1,225 @@
+package data_structures;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+public class UnorderedArrayPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E>{
+
+	//public static final int DEFAULT_MAX_CAPACITY = 1000;
+	private E[] unorArray;
+	private int currSize,maxSize;
+	
+	
+	//Default Constructor that sets array size to default capacity given, and
+		//currSize to zero.
+		UnorderedArrayPriorityQueue()
+		{
+			currSize = 0;
+			maxSize = DEFAULT_MAX_CAPACITY;
+			unorArray = (E[]) new Comparable[maxSize];		
+		}
+		
+		UnorderedArrayPriorityQueue(int queueCap)
+		{
+			currSize = 0;
+			maxSize = queueCap;
+			unorArray = (E[]) new Comparable[maxSize];	  
+		}
+		
+
+    //  Inserts a new object into the priority queue.  Returns true if
+    //  the insertion is successful.  If the PQ is full, the insertion
+    //  is aborted, and the method returns false.
+    public boolean insert(E object)
+    {
+    	if(isFull())
+    	{
+    		//System.out.print("Error: Array is full!");
+    		return false;
+    	}
+    	
+    	unorArray[currSize] = object;
+    	currSize ++;
+    	return true;
+    }
+   
+    //  Removes the object of highest priority that has been in the
+    //  PQ the longest, and returns it.  Returns null if the PQ is empty.
+    public E remove()
+    {
+    	if(isEmpty())
+		{
+			//System.out.print("Error: Array is Empty!");
+			return null;
+		}
+    	
+    	//sets temp to unorArray[0], which would be highest priority if none others are found
+    	//afterwards with different priority value.
+    	
+    	int priIndex = 0;
+    	E temp = unorArray[priIndex];
+
+    	//makes sure to run through the full array in order to find worst case of
+    	//highest priority at end of array. Stores that index point to priIndex
+    	//and replaces it in T temp variable in order for it to be returned in the future.
+    	
+    	for(int i =0; i<currSize; i++ )
+    	{
+    		if(((Comparable<E>)unorArray[i]).compareTo(unorArray[priIndex]) < 0)
+    		{
+    			priIndex = i;
+    			temp = unorArray[priIndex];
+    		}
+    	}
+    	
+		for(int i = priIndex; i < currSize-1; i++ )
+    	{
+    		unorArray[i] = unorArray[i+1];
+    	}
+		
+		currSize --;
+	   	return temp;
+    }
+    
+    //  Deletes all instances of the parameter obj from the PQ if found, and
+    //  returns true.  Returns false if no match to the parameter obj is found.
+    public boolean delete(E obj)
+    {
+    	boolean flag = false;
+    	
+    	if(isEmpty())
+    	{
+    		System.out.print("Error: Array is Empty!");
+    		return flag;
+    	}   	
+    	
+    	
+    	//for loop that, whenever finding a value that matches obj, removes it from array
+    	//also decrements i by one in order for the next run of the loop to recheck that
+    	//value and not skip over it. Attempting to use Comparable for priority check.
+    	
+    	for(int i = 0; i<currSize; i++)
+    	{		
+    		if(((Comparable<E>)obj).compareTo(unorArray[i])==0)
+    		{
+    			flag = true;
+    			for( int j = i ; j<currSize ; j++)
+    			{
+    				unorArray[j] = unorArray[j+1];
+    			}
+    			i--;
+    			currSize--;
+    		}
+    	}
+    	
+    	//flag used to keep track if a value was deleted or not, but applied in such a manner
+    	//in order to prevent the execution of this code from returning after only deleting
+    	//one value.
+    	
+    	return flag;   	
+    }
+   
+    //  Returns the object of highest priority that has been in the
+    //  PQ the longest, but does NOT remove it. 
+    //  Returns null if the PQ is empty.
+    public E peek()
+    {
+    	E temp = null;
+    	
+    	if(isEmpty())
+    	{
+    		System.out.print("Error: Array is Empty!");
+    		return null;
+    	}  	
+    	
+    	temp = unorArray[0];
+    	
+    	for(int i = 0; i<currSize; i++)
+    	{		
+    		if(((Comparable<E>)unorArray[i]).compareTo(temp) < 0)
+    		{
+    			temp = unorArray[i];
+    		}
+    	}
+    	
+    	return temp;
+    }
+    
+    //  Returns true if the priority queue contains the specified element
+    //  false otherwise.
+    public boolean contains(E obj)
+    {
+    	if(isEmpty())
+    	{
+    		System.out.print("Error: Array is Empty");
+    		return false;
+    	}
+    	
+    	for(int i =0; i < currSize ; i++)
+    	{
+    		if(((Comparable<E>)obj).compareTo(unorArray[i])==0)
+    		{
+    			return true;
+    		}
+    	}
+    	
+    	return false;
+    }
+   
+    //  Returns the number of objects currently in the PQ.
+    public int size()
+    {
+    	return currSize;
+    }
+      
+    //  Returns the PQ to an empty state.
+    public void clear()
+    {
+    	currSize = 0;
+    }
+   
+    //  Returns true if the PQ is empty, otherwise false
+    public boolean isEmpty()
+    {
+    	return currSize == 0;
+    }
+   
+    //  Returns true if the PQ is full, otherwise false.  List based
+    //  implementations should always return false.
+    public boolean isFull()
+    {
+    	return currSize == maxSize;
+    }
+    
+    //  Returns an iterator of the objects in the PQ, in no particular
+    //  order.  
+    public Iterator<E> iterator()
+    {
+    	return (Iterator<E>) new IteratorHelper<E>();
+    }
+    
+    class IteratorHelper<E> implements Iterator<E> 
+    {
+    	private int index;
+    	 
+    	public IteratorHelper() {
+    		index = 0;
+    	}
+    	 
+    	public boolean hasNext() {
+    		return index < currSize;
+    	}
+    	 
+    	public E next() {
+    		if (!hasNext())
+    			throw new NoSuchElementException();
+    		index ++;
+    		return (E) unorArray[index];
+    	}
+    	 
+    	public void remove() {
+    		throw new UnsupportedOperationException();
+    	}
+     }
+    
+}
